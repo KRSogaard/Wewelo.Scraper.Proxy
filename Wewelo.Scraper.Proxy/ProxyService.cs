@@ -42,7 +42,7 @@ namespace Wewelo.Scraper.Proxy
         }
 
         /// <summary>
-        /// Returns a list of all Proxies in JSON
+        /// Returns a list of all Proxies as JObjects
         /// </summary>
         public List<JObject> GetAllProxies()
         {
@@ -81,23 +81,27 @@ namespace Wewelo.Scraper.Proxy
             List<JObject> proxyList = new List<JObject>();
             foreach (var line in File.ReadAllLines(path, Encoding.UTF8))
             {
-                string[] split = line.Split(',');
-                //proxyList.Add(new ProxyBonanzaProxy(split[0], split[1], split[2], split[3]));
-                JObject proxyObject = proxyJObject(split[0], split[1], split[2], split[3]); 
-                //add to proxyList
+                proxyList.Add(ProxyJObject(line.Split(',')));
             }
 
-            // we need to random the insert order so all instante will not use the same proxy at the same time.
+            // we need to randomize the insert order so all instante will not use the same proxy at the same time.
             Random rnd = new Random();
             foreach (var proxy in proxyList.OrderBy(x => rnd.Next()))
             {
                 AddProxy(proxy);
             }
         }
-        //TODO
-        private JObject proxyJObject(string v1, string v2, string v3, string v4)
+
+        private JObject ProxyJObject(string[] split)
         {
-            throw new NotImplementedException();
+            JObject proxyObject = new JObject();
+            JArray jarray = new JArray();
+            foreach (string parameter in split)
+            {
+                jarray.Add(parameter);
+            }
+            proxyObject.Add("proxies", jarray);
+            return proxyObject;
         }
 
         public void AddProxy(JObject proxy, bool bad = false)
