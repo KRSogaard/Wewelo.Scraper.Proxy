@@ -31,6 +31,7 @@ namespace Wewelo.Scraper.Proxy
             ProxyRetries = 3;
             proxies = new ConcurrentQueue<JObject>();
             badProxyCounter = new ConcurrentDictionary<JObject, int>();
+            Load(path);
         }
 
         /// <summary>
@@ -47,7 +48,7 @@ namespace Wewelo.Scraper.Proxy
         public List<JObject> GetAllProxies()
         {
             //remember, it should be JSON. Is IWebProxy JSON?
-            List< JObject > proxyList = new List<JObject>();
+            List<JObject> proxyList = new List<JObject>();
 
             JObject proxy;
             while ((proxy = GetProxy()) != null)
@@ -92,13 +93,19 @@ namespace Wewelo.Scraper.Proxy
             }
         }
 
+        /// <summary>
+        /// Create a new proxy from split arguments.
+        /// </summary>
         private JObject ProxyJObject(string[] split)
         {
             JObject proxyObject = new JObject();
             JArray jarray = new JArray();
-            foreach (string parameter in split)
+            string[] parameters = new string[] { "ip", "port", "username", "password" };
+            for (int i = 0; i < split.Length; i++)
             {
-                jarray.Add(parameter);
+                JObject pObject = new JObject();
+                pObject.Add(parameters[i], split[i]);
+                jarray.Add(pObject);
             }
             proxyObject.Add("proxies", jarray);
             return proxyObject;
